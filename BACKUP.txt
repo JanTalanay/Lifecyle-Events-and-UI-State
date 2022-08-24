@@ -1,0 +1,126 @@
+package com.example.lifecyleeventsanduistate
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.os.PersistableBundle
+import android.view.LayoutInflater
+import com.example.lifecyleeventsanduistate.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
+import kotlin.random.Random
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var Rimage :IntArray
+    private lateinit var messages :String
+    private lateinit var coinMessage :String
+    private var coins: Int = 10
+    ////////////////////////////////////////////////
+    private val btnDraw5 by lazy { binding.btndraw5 }
+    private val btnDraw10 by lazy { binding.btndraw10 }
+    private val txtMessage by lazy { binding.txtmessage}
+    private val txtCoins by lazy { binding.txtcoins}
+    private val images by lazy {
+        listOf(binding.img1, binding.img2, binding.img3)
+    }
+
+
+    private lateinit var binding: ActivityMainBinding
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        imageViews()
+        messages = savedInstanceState?.getString(MESSAGE) ?: "Show that APPLE"
+        Rimage = savedInstanceState?.getIntArray(IMAGES) ?: intArrayOf(R.drawable.empty,R.drawable.empty,R.drawable.empty)
+        displayRimages()
+        messages()
+
+
+
+        btnDraw5.setOnClickListener{
+            if(coins > 0) {
+                coins - 5
+                drawSlotMachine()
+            }
+            else{
+                Snackbar.make(it, "No coins stop betting!", Snackbar.LENGTH_LONG).show()
+            }
+        }
+        btnDraw10.setOnClickListener{}
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(MESSAGE, messages)
+        outState.putIntArray(IMAGES, Rimage)
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun messages(){
+        when(appleCount()){
+            1 -> messages = "Nice one "
+            2 -> messages = "You got two!"
+            3 -> messages = "wow you got 3"
+            else -> messages = "Give that Apple"
+        }
+        txtMessage.text = messages
+    }
+
+    private fun draw5(){
+//        when(appleCount()){
+//            1 -> coins + 5
+//            2 -> coins + 10
+//            3 -> coins + 15
+//            else -> coins + 0
+//        }
+//        txtCoins.text = "You have $coins Coins"
+        if (appleCount() == 1){
+            coins + 5
+        }
+        else if (appleCount() == 2){
+            coins + 10
+        }
+        else if (appleCount() == 3){
+            coins + 15
+        }
+        else{
+            coins + 0
+        }
+        txtCoins.text = "You have $coins Coins"
+    }
+
+    private fun appleCount():Int{
+        var counterApple = 0
+        for (i in Rimage){
+            if (R.drawable.apple == i){
+                counterApple++
+            }
+        }
+        return counterApple
+    }
+    private fun randomImage():Int{
+        val r = Random.nextInt(3)
+        return when(r){
+            0 -> R.drawable.apple
+            1 -> R.drawable.grapes
+            2 -> R.drawable.orange
+            else -> R.drawable.empty
+        }
+    }
+    private fun setRImage(){
+        Rimage = intArrayOf(randomImage(),randomImage(), randomImage())
+    }
+    private fun drawSlotMachine() {
+        setRImage()
+        displayRimages()
+        messages()
+        draw5()
+    }
+    private fun displayRimages() {
+        for (i in 0 until Rimage.size) {
+            images[i].setImageResource(Rimage[i])
+        }
+    }
+    private fun imageViews() {
+        for(i in images) i.setImageResource(R.drawable.empty)
+    }
+}
